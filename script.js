@@ -12,11 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetElement = document.querySelector(targetId);
 
             if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth'
-                });
+                targetElement.scrollIntoView({ behavior: 'smooth' });
             }
-            
+
             // Close mobile menu if a link is clicked
             if (mobileMenu.classList.contains('is-active')) {
                 toggleMobileMenu();
@@ -48,19 +46,15 @@ document.addEventListener('DOMContentLoaded', () => {
             menuCloseIcon.classList.remove('hidden');
         }
     };
-    
+
     if (mobileMenuBtn && mobileMenu) {
-        // Toggle menu with the button
         mobileMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleMobileMenu();
         });
 
-        // Add Tap-away-to-close functionality
         mobileMenu.addEventListener('click', (e) => {
-            if (e.target === mobileMenu) {
-                toggleMobileMenu();
-            }
+            if (e.target === mobileMenu) toggleMobileMenu();
         });
     }
 
@@ -90,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cursor.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
             cursorFollower.style.transform = `translate(${followerX}px, ${followerY}px)`;
-            
+
             requestAnimationFrame(animateCursor);
         };
         animateCursor();
@@ -136,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 child.style.transform = 'translateY(0)';
             }, index * 100);
         });
-        
+
         setTimeout(() => {
             const commonTransition = 'opacity 1s ease, transform 1s ease';
             heroSubtitle.style.transition = commonTransition;
@@ -151,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * =================================================================
-     * REVEAL ELEMENTS ON SCROLL (INTERSECTION OBSERVER)
+     * REVEAL ELEMENTS ON SCROLL
      * =================================================================
      */
     const revealElements = document.querySelectorAll('.reveal');
@@ -163,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, { threshold: 0.1 });
-
     revealElements.forEach(el => observer.observe(el));
 
     /**
@@ -197,10 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const { left, top, width, height } = card.getBoundingClientRect();
             const x = (e.clientX - left) / width - 0.5;
             const y = (e.clientY - top) / height - 0.5;
-            card.style.transform = `perspective(1000px) rotateY(${x * 15}deg) rotateX(${-y * 15}deg) scale3d(1.05, 1.05, 1.05)`;
+            card.style.transform = `perspective(1000px) rotateY(${x * 15}deg) rotateX(${-y * 15}deg) scale3d(1.05,1.05,1.05)`;
         });
         card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)';
+            card.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg) scale3d(1,1,1)';
         });
     });
 
@@ -232,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     };
-
     closeModalBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', e => {
         if (e.target === modal) closeModal();
@@ -240,16 +232,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * =================================================================
-     * CONTACT FORM - NETLIFY AJAX SUBMISSION
+     * CONTACT FORM - NETLIFY AJAX SUBMISSION WITH TOAST
      * =================================================================
      */
     const contactForm = document.getElementById('contact-form');
-    const formStatus = document.getElementById('form-status');
+
+    // Create a toast container
+    const toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.style.position = 'fixed';
+    toastContainer.style.top = '20px';
+    toastContainer.style.right = '20px';
+    toastContainer.style.zIndex = '9999';
+    document.body.appendChild(toastContainer);
+
+    const showToast = (message, isSuccess = true) => {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.backgroundColor = isSuccess ? '#4ade80' : '#f87171';
+        toast.style.color = '#fff';
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        toast.style.marginTop = '10px';
+        toast.style.fontFamily = 'sans-serif';
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s, transform 0.5s';
+        toastContainer.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        });
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-20px)';
+            setTimeout(() => toast.remove(), 500);
+        }, 4000);
+    };
 
     if (contactForm) {
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const formData = new FormData(contactForm);
 
             try {
@@ -260,21 +285,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (response.ok) {
-                    formStatus.textContent = "✅ Thank you! Your message has been sent.";
-                    formStatus.classList.remove('text-red-400');
-                    formStatus.classList.add('text-green-400');
+                    showToast("✅ Thank you! Your message has been sent.", true);
                     contactForm.reset();
                 } else {
                     throw new Error('Network response was not ok.');
                 }
             } catch (error) {
-                formStatus.textContent = "❌ Oops! Something went wrong. Please try again.";
-                formStatus.classList.remove('text-green-400');
-                formStatus.classList.add('text-red-400');
+                showToast("❌ Oops! Something went wrong. Please try again.", false);
                 console.error(error);
             }
-
-            setTimeout(() => { formStatus.textContent = ""; }, 5000);
         });
     }
 
