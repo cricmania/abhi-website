@@ -58,13 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add Tap-away-to-close functionality
         mobileMenu.addEventListener('click', (e) => {
-            // If the click is on the background overlay itself (not the links)
             if (e.target === mobileMenu) {
                 toggleMobileMenu();
             }
         });
     }
-
 
     /**
      * =================================================================
@@ -102,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('mouseleave', () => cursorFollower.classList.remove('cursor-grow'));
         });
     }
-
 
     /**
      * =================================================================
@@ -151,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 400);
     };
     animateHeroText();
-    
+
     /**
      * =================================================================
      * REVEAL ELEMENTS ON SCROLL (INTERSECTION OBSERVER)
@@ -168,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.1 });
 
     revealElements.forEach(el => observer.observe(el));
-    
+
     /**
      * =================================================================
      * ABOUT SECTION PARALLAX IMAGE
@@ -226,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modalDescription.textContent = card.dataset.description;
             modalImg.src = card.dataset.img;
             modalImg.alt = `Detailed view of ${card.dataset.title}`;
-            modal.style.display = 'flex'; // Use flex for centering
+            modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         });
     });
@@ -243,16 +240,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * =================================================================
-     * CONTACT FORM
+     * CONTACT FORM - NETLIFY AJAX SUBMISSION
      * =================================================================
      */
     const contactForm = document.getElementById('contact-form');
     const formStatus = document.getElementById('form-status');
-    if(contactForm) {
-        contactForm.addEventListener('submit', (e) => {
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            formStatus.textContent = "Thank you! Your message has been sent.";
-            contactForm.reset();
+
+            const formData = new FormData(contactForm);
+
+            try {
+                const response = await fetch("/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams(formData).toString()
+                });
+
+                if (response.ok) {
+                    formStatus.textContent = "✅ Thank you! Your message has been sent.";
+                    formStatus.classList.remove('text-red-400');
+                    formStatus.classList.add('text-green-400');
+                    contactForm.reset();
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            } catch (error) {
+                formStatus.textContent = "❌ Oops! Something went wrong. Please try again.";
+                formStatus.classList.remove('text-green-400');
+                formStatus.classList.add('text-red-400');
+                console.error(error);
+            }
+
             setTimeout(() => { formStatus.textContent = ""; }, 5000);
         });
     }
@@ -355,4 +376,5 @@ document.addEventListener('DOMContentLoaded', () => {
             window.resizeTimeout = setTimeout(initCanvas, 250);
         });
     }
+
 });
